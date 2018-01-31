@@ -6,10 +6,8 @@ import {
   DeviceEventEmitter
 } from 'react-native';
 
-import React, {
-  Component,
-  PropTypes
-} from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 import MapTypes from './MapTypes';
 
