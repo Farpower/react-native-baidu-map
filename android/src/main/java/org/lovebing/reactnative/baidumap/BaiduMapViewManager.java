@@ -17,7 +17,9 @@ import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.MapViewLayoutParams;
 import com.baidu.mapapi.map.Marker;
+import com.baidu.mapapi.map.Overlay;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.model.LatLngBounds;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.bridge.ReadableMap;
@@ -159,6 +161,17 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
             }
         }
         mMarkersMap.put(key, markers);
+
+
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        for (Overlay overlay : markers) {
+            // polyline 中的点可能太多，只按marker 缩放
+            if (overlay instanceof Marker) {
+                builder.include(((Marker) overlay).getPosition());
+            }
+        }
+        mapView.getMap().setMapStatus(MapStatusUpdateFactory
+            .newLatLngBounds(builder.build()));
     }
 
     @ReactProp(name = "childrenPoints")
