@@ -246,6 +246,14 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
             @Override
             public boolean onClusterClick(Cluster<MyItem> cluster) {
                 Log.e("mClusterManager", "onClusterClick");
+                double latitude = cluster.getPosition().latitude;
+                double longitude = cluster.getPosition().longitude;
+                LatLng point = new LatLng(latitude, longitude);
+                MapStatus mapStatus = new MapStatus.Builder()
+                    .target(point)
+                    .build();
+                MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mapStatus);
+                mapView.getMap().setMapStatus(mapStatusUpdate);
                 mapView.getMap().setMapStatus(MapStatusUpdateFactory.zoomIn());
                 return false;
             }
@@ -259,7 +267,6 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
                 position.putDouble("latitude", item.getPosition().latitude);
                 position.putDouble("longitude", item.getPosition().longitude);
                 writableMap.putMap("position", position);
-                //  writableMap.putString("title", cluster.getTitle());
                 sendEvent(mapView, "onMarkerClick", writableMap);
                 return false;
             }
