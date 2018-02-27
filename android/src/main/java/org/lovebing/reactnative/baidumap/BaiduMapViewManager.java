@@ -6,8 +6,14 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.baidu.mapapi.clusterutil.clustering.Cluster;
+import com.baidu.mapapi.clusterutil.clustering.ClusterItem;
+import com.baidu.mapapi.clusterutil.clustering.ClusterManager;
 import com.baidu.mapapi.map.BaiduMap;
+import com.baidu.mapapi.map.BitmapDescriptor;
+import com.baidu.mapapi.map.BitmapDescriptorFactory;
 import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapPoi;
 import com.baidu.mapapi.map.MapStatus;
@@ -43,9 +49,10 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
     private ThemedReactContext mReactContext;
 
     private ReadableArray childrenPoints;
-    private HashMap<String, Marker> mMarkerMap = new HashMap<>();
-    private HashMap<String, List<Marker>> mMarkersMap = new HashMap<>();
+  //  private HashMap<String, Marker> mMarkerMap = new HashMap<>();
+   // private HashMap<String, List<Marker>> mMarkersMap = new HashMap<>();
     private TextView mMarkerText;
+    private ClusterManager<MyItem> mClusterManager;
 
     public String getName() {
         return REACT_CLASS;
@@ -58,27 +65,27 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
 
     public MapView createViewInstance(ThemedReactContext context) {
         mReactContext = context;
-        MapView mapView =  new MapView(context);
+        MapView mapView = new MapView(context);
+        mClusterManager = new ClusterManager<MyItem>(mapView, mapView.getMap(),mReactContext);
         setListeners(mapView);
         return mapView;
     }
 
     @Override
     public void addView(MapView parent, View child, int index) {
-        if(childrenPoints != null) {
+        if (childrenPoints != null) {
             Point point = new Point();
             ReadableArray item = childrenPoints.getArray(index);
-            if(item != null) {
+            if (item != null) {
                 point.set(item.getInt(0), item.getInt(1));
                 MapViewLayoutParams mapViewLayoutParams = new MapViewLayoutParams
-                        .Builder()
-                        .layoutMode(MapViewLayoutParams.ELayoutMode.absoluteMode)
-                        .point(point)
-                        .build();
+                    .Builder()
+                    .layoutMode(MapViewLayoutParams.ELayoutMode.absoluteMode)
+                    .point(point)
+                    .build();
                 parent.addView(child, mapViewLayoutParams);
             }
         }
-
     }
 
     @ReactProp(name = "zoomControlsVisible")
@@ -86,12 +93,12 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
         mapView.showZoomControls(zoomControlsVisible);
     }
 
-    @ReactProp(name="trafficEnabled")
+    @ReactProp(name = "trafficEnabled")
     public void setTrafficEnabled(MapView mapView, boolean trafficEnabled) {
         mapView.getMap().setTrafficEnabled(trafficEnabled);
     }
 
-    @ReactProp(name="baiduHeatMapEnabled")
+    @ReactProp(name = "baiduHeatMapEnabled")
     public void setBaiduHeatMapEnabled(MapView mapView, boolean baiduHeatMapEnabled) {
         mapView.getMap().setBaiduHeatMapEnabled(baiduHeatMapEnabled);
     }
@@ -101,78 +108,80 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
         mapView.getMap().setMapType(mapType);
     }
 
-    @ReactProp(name="zoom")
+    @ReactProp(name = "zoom")
     public void setZoom(MapView mapView, float zoom) {
         MapStatus mapStatus = new MapStatus.Builder().zoom(zoom).build();
         MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mapStatus);
         mapView.getMap().setMapStatus(mapStatusUpdate);
     }
-    @ReactProp(name="center")
+
+    @ReactProp(name = "center")
     public void setCenter(MapView mapView, ReadableMap position) {
-        if(position != null) {
-            double latitude = position.getDouble("latitude");
-            double longitude = position.getDouble("longitude");
-            LatLng point = new LatLng(latitude, longitude);
-            MapStatus mapStatus = new MapStatus.Builder()
-                    .target(point)
-                    .build();
-            MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mapStatus);
-            mapView.getMap().setMapStatus(mapStatusUpdate);
-        }
+        Log.i("setCenter","setCenter");
+//        if (position != null) {
+//            double latitude = position.getDouble("latitude");
+//            double longitude = position.getDouble("longitude");
+//            LatLng point = new LatLng(latitude, longitude);
+//            MapStatus mapStatus = new MapStatus.Builder()
+//                .target(point)
+//                .build();
+//            MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mapStatus);
+//            mapView.getMap().setMapStatus(mapStatusUpdate);
+//        }
     }
 
-    @ReactProp(name="marker")
+    @ReactProp(name = "marker")
     public void setMarker(MapView mapView, ReadableMap option) {
-        if(option != null) {
-            String key = "marker_" + mapView.getId();
-            Marker marker = mMarkerMap.get(key);
-            if(marker != null) {
-                MarkerUtil.updateMaker(marker, option);
-            }
-            else {
-                marker = MarkerUtil.addMarker(mapView, option);
-                mMarkerMap.put(key, marker);
-            }
-        }
+//        if (option != null) {
+//            String key = "marker_" + mapView.getId();
+//            Marker marker = mMarkerMap.get(key);
+//            if (marker != null) {
+//                MarkerUtil.updateMaker(marker, option);
+//            } else {
+//                marker = MarkerUtil.addMarker(mapView, option);
+//                mMarkerMap.put(key, marker);
+//            }
+//        }
     }
 
-    @ReactProp(name="markers")
+    @ReactProp(name = "markers")
     public void setMarkers(MapView mapView, ReadableArray options) {
-        String key = "markers_" + mapView.getId();
-        List<Marker> markers = mMarkersMap.get(key);
-        if(markers == null) {
-            markers = new ArrayList<>();
-        }
+        Log.i("setMakers","setMakers");
+        List<MyItem> items = new ArrayList<MyItem>();
+        mClusterManager.clearItems();
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
         for (int i = 0; i < options.size(); i++) {
             ReadableMap option = options.getMap(i);
-            if(markers.size() > i + 1 && markers.get(i) != null) {
-                MarkerUtil.updateMaker(markers.get(i), option);
-            }
-            else {
-                markers.add(i, MarkerUtil.addMarker(mapView, option));
-            }
+            builder.include(MarkerUtil.getLatLngFromOption(option));
+            items.add(new MyItem(MarkerUtil.getLatLngFromOption(option)));
         }
-        if(options.size() < markers.size()) {
-            int start = markers.size() - 1;
-            int end = options.size();
-            for (int i = start; i >= end; i--) {
-                markers.get(i).remove();
-                markers.remove(i);
-            }
-        }
-        mMarkersMap.put(key, markers);
-
-
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (Overlay overlay : markers) {
-            // polyline 中的点可能太多，只按marker 缩放
-            if (overlay instanceof Marker) {
-                builder.include(((Marker) overlay).getPosition());
-            }
-        }
+        mClusterManager.addItems(items);
         mapView.getMap().setMapStatus(MapStatusUpdateFactory
             .newLatLngBounds(builder.build()));
     }
+    /**
+     * 每个Marker点，包含Marker点坐标以及图标
+     */
+    public class MyItem implements ClusterItem {
+        private final LatLng mPosition;
+
+
+        public MyItem(LatLng latLng) {
+            mPosition = latLng;
+        }
+
+        @Override
+        public LatLng getPosition() {
+            return mPosition;
+        }
+
+        @Override
+        public BitmapDescriptor getBitmapDescriptor() {
+            return BitmapDescriptorFactory
+                .fromResource(R.mipmap.icon_gcoding);
+        }
+    }
+
 
     @ReactProp(name = "childrenPoints")
     public void setChildrenPoints(MapView mapView, ReadableArray childrenPoints) {
@@ -180,52 +189,20 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
     }
 
     /**
-     *
      * @param mapView
      */
     private void setListeners(final MapView mapView) {
         BaiduMap map = mapView.getMap();
 
-        if(mMarkerText == null) {
+        if (mMarkerText == null) {
             mMarkerText = new TextView(mapView.getContext());
             mMarkerText.setBackgroundResource(R.drawable.popup);
             mMarkerText.setPadding(32, 32, 32, 32);
         }
-        map.setOnMapStatusChangeListener(new BaiduMap.OnMapStatusChangeListener() {
-
-            private WritableMap getEventParams(MapStatus mapStatus) {
-                WritableMap writableMap = Arguments.createMap();
-                WritableMap target = Arguments.createMap();
-                target.putDouble("latitude", mapStatus.target.latitude);
-                target.putDouble("longitude", mapStatus.target.longitude);
-                writableMap.putMap("target", target);
-                writableMap.putDouble("zoom", mapStatus.zoom);
-                writableMap.putDouble("overlook", mapStatus.overlook);
-                return writableMap;
-            }
-
-            @Override
-            public void onMapStatusChangeStart(MapStatus mapStatus) {
-                sendEvent(mapView, "onMapStatusChangeStart", getEventParams(mapStatus));
-            }
-
-            @Override
-            public void onMapStatusChange(MapStatus mapStatus) {
-                sendEvent(mapView, "onMapStatusChange", getEventParams(mapStatus));
-            }
-
-            @Override
-            public void onMapStatusChangeFinish(MapStatus mapStatus) {
-                if(mMarkerText.getVisibility() != View.GONE) {
-                    mMarkerText.setVisibility(View.GONE);
-                }
-                sendEvent(mapView, "onMapStatusChangeFinish", getEventParams(mapStatus));
-            }
-        });
-
         map.setOnMapLoadedCallback(new BaiduMap.OnMapLoadedCallback() {
             @Override
             public void onMapLoaded() {
+                Log.e("onMapLoaded","onMapLoaded");
                 sendEvent(mapView, "onMapLoaded", null);
             }
         });
@@ -261,33 +238,36 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
             }
         });
 
-        map.setOnMarkerClickListener(new BaiduMap.OnMarkerClickListener() {
+        map.setOnMapStatusChangeListener(mClusterManager);
+
+        map.setOnMarkerClickListener(mClusterManager);
+
+        mClusterManager.setOnClusterClickListener(new ClusterManager.OnClusterClickListener<MyItem>() {
             @Override
-            public boolean onMarkerClick(Marker marker) {
-                if(marker.getTitle().length() > 0) {
-                    mMarkerText.setText(marker.getTitle());
-                    InfoWindow infoWindow = new InfoWindow(mMarkerText, marker.getPosition(), -80);
-                    mMarkerText.setVisibility(View.GONE);
-                    mapView.getMap().showInfoWindow(infoWindow);
-                }
-                else {
-                    mapView.getMap().hideInfoWindow();
-                }
+            public boolean onClusterClick(Cluster<MyItem> cluster) {
+                Log.e("mClusterManager", "onClusterClick");
+                mapView.getMap().setMapStatus(MapStatusUpdateFactory.zoomIn());
+                return false;
+            }
+        });
+        mClusterManager.setOnClusterItemClickListener(new ClusterManager.OnClusterItemClickListener<MyItem>() {
+            @Override
+            public boolean onClusterItemClick(MyItem item) {
+                Log.e("mClusterManager", "onClusterItemClick");
                 WritableMap writableMap = Arguments.createMap();
                 WritableMap position = Arguments.createMap();
-                position.putDouble("latitude", marker.getPosition().latitude);
-                position.putDouble("longitude", marker.getPosition().longitude);
+                position.putDouble("latitude", item.getPosition().latitude);
+                position.putDouble("longitude", item.getPosition().longitude);
                 writableMap.putMap("position", position);
-                writableMap.putString("title", marker.getTitle());
+                //  writableMap.putString("title", cluster.getTitle());
                 sendEvent(mapView, "onMarkerClick", writableMap);
-                return true;
+                return false;
             }
         });
 
     }
 
     /**
-     *
      * @param eventName
      * @param params
      */
@@ -296,9 +276,9 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
         event.putMap("params", params);
         event.putString("type", eventName);
         mReactContext
-                .getJSModule(RCTEventEmitter.class)
-                .receiveEvent(mapView.getId(),
-                        "topChange",
-                        event);
+            .getJSModule(RCTEventEmitter.class)
+            .receiveEvent(mapView.getId(),
+                "topChange",
+                event);
     }
 }

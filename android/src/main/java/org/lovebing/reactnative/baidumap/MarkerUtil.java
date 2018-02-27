@@ -37,7 +37,7 @@ public class MarkerUtil {
     }
 
 
-    private static LatLng getLatLngFromOption(ReadableMap option) {
+    public static LatLng getLatLngFromOption(ReadableMap option) {
         double latitude = option.getDouble("latitude");
         double longitude = option.getDouble("longitude");
         return new LatLng(latitude, longitude);
