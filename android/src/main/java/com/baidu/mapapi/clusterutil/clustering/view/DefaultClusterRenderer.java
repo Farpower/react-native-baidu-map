@@ -123,7 +123,9 @@ public class DefaultClusterRenderer<T extends ClusterItem> implements
         mIconGenerator = new IconGenerator(context);
         mIconGenerator.setContentView(makeSquareTextView(context));
         mIconGenerator.setTextAppearance(R.style.ClusterIcon_TextAppearance);
-        mIconGenerator.setBackground(makeClusterBackground());
+        makeClusterBackground();
+        mIconGenerator.setBackground(context.getResources().getDrawable(R.mipmap.ic_all));
+       // mIconGenerator.setBackground(makeClusterBackground());
         mClusterManager = clusterManager;
     }
 
@@ -170,7 +172,7 @@ public class DefaultClusterRenderer<T extends ClusterItem> implements
         squareTextView.setLayoutParams(layoutParams);
         squareTextView.setId(R.id.text);
         int twelveDpi = (int) (12 * mDensity);
-        squareTextView.setPadding(twelveDpi, twelveDpi, twelveDpi, twelveDpi);
+        squareTextView.setPadding(twelveDpi, twelveDpi/2, twelveDpi, twelveDpi);
         return squareTextView;
     }
 
