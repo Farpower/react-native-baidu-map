@@ -24,6 +24,7 @@ import com.baidu.mapapi.SDKInitializer;
 import com.baidu.mapapi.map.MapViewLayoutParams;
 import com.baidu.mapapi.map.Marker;
 import com.baidu.mapapi.map.Overlay;
+import com.baidu.mapapi.map.TextureMapView;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.LatLngBounds;
 import com.facebook.react.bridge.Arguments;
@@ -42,7 +43,7 @@ import java.util.List;
 /**
  * Created by lovebing on 12/20/2015.
  */
-public class BaiduMapViewManager extends ViewGroupManager<MapView> {
+public class BaiduMapViewManager extends ViewGroupManager<TextureMapView> {
 
     private static final String REACT_CLASS = "RCTBaiduMapView";
 
@@ -63,16 +64,15 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
         SDKInitializer.initialize(context);
     }
 
-    public MapView createViewInstance(ThemedReactContext context) {
+    public TextureMapView createViewInstance(ThemedReactContext context) {
         mReactContext = context;
-        MapView mapView = new MapView(context);
+        TextureMapView mapView = new TextureMapView(context);
         mClusterManager = new ClusterManager<MyItem>(mapView, mapView.getMap(),mReactContext);
         setListeners(mapView);
         return mapView;
     }
-
     @Override
-    public void addView(MapView parent, View child, int index) {
+    public void addView(TextureMapView parent, View child, int index) {
         if (childrenPoints != null) {
             Point point = new Point();
             ReadableArray item = childrenPoints.getArray(index);
@@ -89,34 +89,34 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
     }
 
     @ReactProp(name = "zoomControlsVisible")
-    public void setZoomControlsVisible(MapView mapView, boolean zoomControlsVisible) {
+    public void setZoomControlsVisible(TextureMapView mapView, boolean zoomControlsVisible) {
         mapView.showZoomControls(zoomControlsVisible);
     }
 
     @ReactProp(name = "trafficEnabled")
-    public void setTrafficEnabled(MapView mapView, boolean trafficEnabled) {
+    public void setTrafficEnabled(TextureMapView mapView, boolean trafficEnabled) {
         mapView.getMap().setTrafficEnabled(trafficEnabled);
     }
 
     @ReactProp(name = "baiduHeatMapEnabled")
-    public void setBaiduHeatMapEnabled(MapView mapView, boolean baiduHeatMapEnabled) {
+    public void setBaiduHeatMapEnabled(TextureMapView mapView, boolean baiduHeatMapEnabled) {
         mapView.getMap().setBaiduHeatMapEnabled(baiduHeatMapEnabled);
     }
 
     @ReactProp(name = "mapType")
-    public void setMapType(MapView mapView, int mapType) {
+    public void setMapType(TextureMapView mapView, int mapType) {
         mapView.getMap().setMapType(mapType);
     }
 
     @ReactProp(name = "zoom")
-    public void setZoom(MapView mapView, float zoom) {
+    public void setZoom(TextureMapView mapView, float zoom) {
         MapStatus mapStatus = new MapStatus.Builder().zoom(zoom).build();
         MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mapStatus);
         mapView.getMap().setMapStatus(mapStatusUpdate);
     }
 
     @ReactProp(name = "center")
-    public void setCenter(MapView mapView, ReadableMap position) {
+    public void setCenter(TextureMapView mapView, ReadableMap position) {
         Log.i("setCenter","setCenter");
 //        if (position != null) {
 //            double latitude = position.getDouble("latitude");
@@ -131,7 +131,7 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
     }
 
     @ReactProp(name = "marker")
-    public void setMarker(MapView mapView, ReadableMap option) {
+    public void setMarker(TextureMapView mapView, ReadableMap option) {
 //        if (option != null) {
 //            String key = "marker_" + mapView.getId();
 //            Marker marker = mMarkerMap.get(key);
@@ -145,7 +145,7 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
     }
 
     @ReactProp(name = "markers")
-    public void setMarkers(MapView mapView, ReadableArray options) {
+    public void setMarkers(TextureMapView mapView, ReadableArray options) {
         Log.i("setMakers","setMakers");
         List<MyItem> items = new ArrayList<MyItem>();
         mClusterManager.clearItems();
@@ -184,14 +184,14 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
 
 
     @ReactProp(name = "childrenPoints")
-    public void setChildrenPoints(MapView mapView, ReadableArray childrenPoints) {
+    public void setChildrenPoints(TextureMapView mapView, ReadableArray childrenPoints) {
         this.childrenPoints = childrenPoints;
     }
 
     /**
      * @param mapView
      */
-    private void setListeners(final MapView mapView) {
+    private void setListeners(final TextureMapView mapView) {
         BaiduMap map = mapView.getMap();
 
         if (mMarkerText == null) {
@@ -271,7 +271,7 @@ public class BaiduMapViewManager extends ViewGroupManager<MapView> {
      * @param eventName
      * @param params
      */
-    private void sendEvent(MapView mapView, String eventName, @Nullable WritableMap params) {
+    private void sendEvent(TextureMapView mapView, String eventName, @Nullable WritableMap params) {
         WritableMap event = Arguments.createMap();
         event.putMap("params", params);
         event.putString("type", eventName);

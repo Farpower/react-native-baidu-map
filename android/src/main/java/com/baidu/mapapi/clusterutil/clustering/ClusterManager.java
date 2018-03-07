@@ -21,6 +21,7 @@ import com.baidu.mapapi.map.InfoWindow;
 import com.baidu.mapapi.map.MapStatus;
 import com.baidu.mapapi.map.MapView;
 import com.baidu.mapapi.map.Marker;
+import com.baidu.mapapi.map.TextureMapView;
 import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactContext;
 import com.facebook.react.bridge.WritableMap;
@@ -58,12 +59,12 @@ public class ClusterManager<T extends ClusterItem> implements
     private OnClusterItemInfoWindowClickListener<T> mOnClusterItemInfoWindowClickListener;
     private OnClusterClickListener<T> mOnClusterClickListener;
     private ThemedReactContext mReactContext;
-    private MapView mapView;
-    public ClusterManager(MapView mapView, BaiduMap map,ThemedReactContext cx) {
+    private TextureMapView mapView;
+    public ClusterManager(TextureMapView mapView, BaiduMap map, ThemedReactContext cx) {
         this(mapView, map, new MarkerManager(map),cx);
     }
 
-    public ClusterManager(MapView mapView, BaiduMap map, MarkerManager markerManager, ThemedReactContext cx) {
+    public ClusterManager(TextureMapView mapView, BaiduMap map, MarkerManager markerManager, ThemedReactContext cx) {
         mMap = map;
         this.mapView=mapView;
         mReactContext = cx;
@@ -311,7 +312,7 @@ public class ClusterManager<T extends ClusterItem> implements
      * @param eventName
      * @param params
      */
-    private void sendEvent(MapView mapView, String eventName, @Nullable WritableMap params) {
+    private void sendEvent(TextureMapView mapView, String eventName, @Nullable WritableMap params) {
         WritableMap event = Arguments.createMap();
         event.putMap("params", params);
         event.putString("type", eventName);
