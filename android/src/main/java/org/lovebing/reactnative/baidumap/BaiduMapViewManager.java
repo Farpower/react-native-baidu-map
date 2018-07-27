@@ -118,16 +118,16 @@ public class BaiduMapViewManager extends ViewGroupManager<TextureMapView> {
     @ReactProp(name = "center")
     public void setCenter(TextureMapView mapView, ReadableMap position) {
         Log.i("setCenter","setCenter");
-//        if (position != null) {
-//            double latitude = position.getDouble("latitude");
-//            double longitude = position.getDouble("longitude");
-//            LatLng point = new LatLng(latitude, longitude);
-//            MapStatus mapStatus = new MapStatus.Builder()
-//                .target(point)
-//                .build();
-//            MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mapStatus);
-//            mapView.getMap().setMapStatus(mapStatusUpdate);
-//        }
+       if (position != null) {
+           double latitude = position.getDouble("latitude");
+           double longitude = position.getDouble("longitude");
+           LatLng point = new LatLng(latitude, longitude);
+           MapStatus mapStatus = new MapStatus.Builder()
+               .target(point)
+               .build();
+           MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mapStatus);
+           mapView.getMap().setMapStatus(mapStatusUpdate);
+       }
     }
 
     @ReactProp(name = "marker")
