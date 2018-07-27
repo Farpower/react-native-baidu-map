@@ -117,17 +117,17 @@ public class BaiduMapViewManager extends ViewGroupManager<TextureMapView> {
 
     @ReactProp(name = "center")
     public void setCenter(TextureMapView mapView, ReadableMap position) {
-        Log.i("setCenter","setCenter");
-       if (position != null) {
-           double latitude = position.getDouble("latitude");
-           double longitude = position.getDouble("longitude");
-           LatLng point = new LatLng(latitude, longitude);
-           MapStatus mapStatus = new MapStatus.Builder()
-               .target(point)
-               .build();
-           MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mapStatus);
-           mapView.getMap().setMapStatus(mapStatusUpdate);
-       }
+       //  Log.i("setCenter","setCenter");
+       // if (position != null) {
+       //     double latitude = position.getDouble("latitude");
+       //     double longitude = position.getDouble("longitude");
+       //     LatLng point = new LatLng(latitude, longitude);
+       //     MapStatus mapStatus = new MapStatus.Builder()
+       //         .target(point)
+       //         .build();
+       //     MapStatusUpdate mapStatusUpdate = MapStatusUpdateFactory.newMapStatus(mapStatus);
+       //     mapView.getMap().setMapStatus(mapStatusUpdate);
+       // }
     }
 
     @ReactProp(name = "marker")
@@ -146,18 +146,25 @@ public class BaiduMapViewManager extends ViewGroupManager<TextureMapView> {
 
     @ReactProp(name = "markers")
     public void setMarkers(TextureMapView mapView, ReadableArray options) {
-        Log.i("setMakers","setMakers");
-        List<MyItem> items = new ArrayList<MyItem>();
-        mClusterManager.clearItems();
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (int i = 0; i < options.size(); i++) {
-            ReadableMap option = options.getMap(i);
-            builder.include(MarkerUtil.getLatLngFromOption(option));
-            items.add(new MyItem(MarkerUtil.getLatLngFromOption(option)));
+        if (options.size() <= 0) {
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            builder.include(new LatLng(36.6386720382, 117.1135711670));
+            mapView.getMap().setMapStatus(MapStatusUpdateFactory
+                .newLatLngBounds(builder.build()));
+        } else {
+            List<MyItem> items = new ArrayList<MyItem>();
+            mClusterManager.clearItems();
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            for (int i = 0; i < options.size(); i++) {
+                ReadableMap option = options.getMap(i);
+                builder.include(MarkerUtil.getLatLngFromOption(option));
+                items.add(new MyItem(MarkerUtil.getLatLngFromOption(option)));
+            }
+            mClusterManager.addItems(items);
+            mapView.getMap().setMapStatus(MapStatusUpdateFactory
+                .newLatLngBounds(builder.build()));
         }
-        mClusterManager.addItems(items);
-        mapView.getMap().setMapStatus(MapStatusUpdateFactory
-            .newLatLngBounds(builder.build()));
+        Log.i("setMakers", "setMakers");
     }
     /**
      * 每个Marker点，包含Marker点坐标以及图标
